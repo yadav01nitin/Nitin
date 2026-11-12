@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roadwatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0E2430;
+    --bg-elevated: #123043;
+    --bg-input: #0A1D27;
+    --line: rgba(237,243,240,0.14);
+    --line-soft: rgba(237,243,240,0.08);
+    --text: #EDF3F0;
+    --text-muted: #93A9A4;
+    --flood: #E2A63B;
+    --flood-bg: rgba(226,166,59,0.13);
+    --clear: #5FA88C;
+    --clear-bg: rgba(95,168,140,0.13);
+    --unknown: #7C8B93;
+    --unknown-bg: rgba(124,139,147,0.14);
+    --serif: "Fraunces", Georgia, serif;
+    --sans: "IBM Plex Sans", -apple-system, sans-serif;
+  }
+  :root:not([data-theme="light"]) { color-scheme: dark; }
+  :root[data-theme="light"] {
+    --bg: #F4F5F1;
+    --bg-elevated: #FFFFFF;
+    --bg-input: #FFFFFF;
+    --line: rgba(14,36,48,0.14);
+    --line-soft: rgba(14,36,48,0.08);
+    --text: #10222B;
+    --text-muted: #5B6E68;
+    --flood-bg: rgba(196,133,20,0.12);
+    --clear-bg: rgba(58,128,99,0.10);
+    --unknown-bg: rgba(124,139,147,0.14);
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #F4F5F1;
+      --bg-elevated: #FFFFFF;
+      --bg-input: #FFFFFF;
+      --line: rgba(14,36,48,0.14);
+      --line-soft: rgba(14,36,48,0.08);
+      --text: #10222B;
+      --text-muted: #5B6E68;
+      --flood-bg: rgba(196,133,20,0.12);
+      --clear-bg: rgba(58,128,99,0.10);
+      --unknown-bg: rgba(124,139,147,0.14);
+      color-scheme: light;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 28px 18px 80px;
+  }
+
+  header.top { margin-bottom: 22px; }
+  .eyebrow-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 34px;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .tide {
+    display: inline-block;
+    transform: translateY(2px);
+  }
+  .status-count {
+    font-size: 13px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .status-count strong { color: var(--flood); font-weight: 600; }
+  p.tagline {
+    margin: 6px 0 0;
+    color: var(--text-muted);
+    font-size: 14.5px;
+    max-width: 44ch;
+    line-height: 1.5;
+  }
+
+  .setup-note {
+    margin: 14px 0 0;
+    padding: 9px 12px;
+    border: 1px solid var(--line-soft);
+    border-left: 3px solid var(--flood);
+    border-radius: 8px;
+    background: var(--flood-bg);
+    color: var(--text-muted);
+    font-size: 12.5px;
+    line-height: 1.45;
+  }
+  .setup-note a { color: var(--text); }
+  .setup-note a.setup-jump { color: var(--flood); white-space: nowrap; }
+
+  .connect {
+    margin: 10px 0 0;
+    border: 1px solid var(--line-soft);
+    border-radius: 8px;
+    background: var(--bg-elevated);
+  }
+  .connect summary {
+    cursor: pointer;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+    list-style: none;
+  }
+  .connect summary::-webkit-details-marker { display: none; }
+  .connect summary::before { content: '+ '; color: var(--flood); }
+  .connect[open] summary::before { content: '− '; }
+  .connect-body { padding: 0 12px 14px; }
+  .connect-steps {
+    margin: 0 0 10px;
+    padding-left: 18px;
+    color: var(--text-muted);
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+  .connect-steps b, .connect-steps i { color: var(--text); font-style: normal; font-weight: 600; }
+  .connect-steps a, .connect-hint a { color: var(--flood); }
+  .connect-steps code { font-size: 11.5px; }
+  .connect-row { display: flex; gap: 8px; }
+  .connect-row input { flex: 1; min-width: 0; font-size: 12px; }
+  .connect-hint {
+    margin: 6px 0 0;
+    min-height: 0;
+    color: var(--flood);
+    font-size: 12px;
+  }
+  .code-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 12px 0 4px;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .btn-copy {
+    font-family: var(--sans);
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .btn-copy:hover { background: var(--bg-input); }
+  .code-box {
+    margin: 0;
+    max-height: 190px;
+    overflow: auto;
+    padding: 10px;
+    border-radius: 6px;
+    background: var(--bg-input);
+    border: 1px solid var(--line-soft);
+    color: var(--text-muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    white-space: pre;
+  }
+
+  .search-row {
+    display: flex;
+    gap: 8px;
+    margin: 20px 0 6px;
+  }  input[type="text"], textarea {
+    font-family: var(--sans);
+    background: var(--bg-input);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 11px 13px;
+    font-size: 15px;
+    width: 100%;
+  }
+  input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--flood);
+  }
+  .search-row input { flex: 1; }
+  button {
+    font-family: var(--sans);
+    cursor: pointer;
+  }
+  .btn-add {
+    background: var(--flood);
+    color: #1A1305;
+    border: none;
+    border-radius: 8px;
+    padding: 0 16px;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .btn-add:active { opacity: 0.85; }
+
+  section.list {
+    margin-top: 18px;
+    border-top: 1px solid var(--line-soft);
+  }
+  .group-label {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    padding: 16px 2px 8px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot.flooded { background: var(--flood); }
+  .dot.clear { background: var(--clear); }
+  .dot.unknown { background: var(--unknown); }
+
+  .road-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 2px;
+    border-bottom: 1px solid var(--line-soft);
+    cursor: pointer;
+  }
+  .road-row .bar {
+    width: 3px;
+    align-self: stretch;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .bar.flooded { background: var(--flood); }
+  .bar.clear { background: var(--clear); }
+  .bar.unknown { background: var(--unknown); }
+  .road-main { flex: 1; min-width: 0; }
+  .road-name {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 3px;
+  }
+  .road-meta {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pill {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+  .pill.flooded { background: var(--flood-bg); color: var(--flood); }
+  .pill.clear { background: var(--clear-bg); color: var(--clear); }
+  .pill.unknown { background: var(--unknown-bg); color: var(--unknown); }
+
+  .empty {
+    padding: 40px 4px;
+    color: var(--text-muted);
+    font-size: 14.5px;
+    line-height: 1.6;
+    max-width: 38ch;
+  }
+  .empty strong { color: var(--text); font-family: var(--serif); font-weight: 500; font-size: 18px; display: block; margin-bottom: 6px; }
+
+  /* Live location */
+  .locate-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 2px 0;
+  }
+  .btn-locate {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-muted);
+    border-radius: 20px;
+    padding: 7px 13px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-locate.active { border-color: var(--clear); color: var(--clear); }
+  .locate-pulse {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--unknown);
+  }
+  .btn-locate.active .locate-pulse {
+    background: var(--clear);
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(95,168,140,0.5); }
+    70% { box-shadow: 0 0 0 7px rgba(95,168,140,0); }
+    100% { box-shadow: 0 0 0 0 rgba(95,168,140,0); }
+  }
+  .radar-wrap {
+    margin-top: 16px;
+    border: 1px solid var(--line-soft);
+    border-radius: 14px;
+    padding: 14px 14px 10px;
+    display: none;
+  }
+  .radar-wrap.visible { display: block; }
+  .radar-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .radar-title { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+  .radar-scale { font-size: 11.5px; color: var(--text-muted); }
+  .radar-svg { display: block; width: 100%; height: auto; }
+  .radar-ring { fill: none; stroke: var(--line-soft); stroke-width: 1; }
+  .radar-you { fill: var(--text); }
+  .radar-you-ring { fill: none; stroke: var(--text); stroke-width: 1; opacity: 0.35; }
+  .radar-marker circle { stroke: var(--bg); stroke-width: 2; cursor: pointer; }
+  .radar-marker.flooded circle { fill: var(--flood); }
+  .radar-marker.clear circle { fill: var(--clear); }
+  .radar-marker.unknown circle { fill: var(--unknown); }
+  .radar-marker text {
+    font-family: var(--sans);
+    font-size: 8.5px;
+    fill: var(--text-muted);
+  }
+  .radar-empty {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    padding: 6px 2px 8px;
+  }
+
+  /* Detail sheet */
+  .sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(4,10,13,0.55);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 10;
+  }
+  .sheet-backdrop.open { display: flex; }
+  .sheet {
+    background: var(--bg-elevated);
+    width: 100%;
+    max-width: 560px;
+    border-radius: 16px 16px 0 0;
+    padding: 22px 20px 26px;
+    border-top: 1px solid var(--line);
+  }
+  .sheet-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 500;
+    margin: 0 0 2px;
+  }
+  .sheet-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0 0 18px;
+  }
+  .choice-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .choice {
+    flex: 1;
+    text-align: center;
+    padding: 12px 6px;
+    border-radius: 9px;
+    border: 1.5px solid var(--line);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+  .choice.selected.flooded { border-color: var(--flood); background: var(--flood-bg); color: var(--flood); }
+  .choice.selected.clear { border-color: var(--clear); background: var(--clear-bg); color: var(--clear); }
+  .choice.selected.unknown { border-color: var(--unknown); background: var(--unknown-bg); color: var(--unknown); }
+  textarea { resize: none; min-height: 64px; font-size: 14px; margin-bottom: 14px; }
+  .sheet-actions { display: flex; gap: 8px; }
+  .btn-save {
+    flex: 1;
+    background: var(--flood);
+    color: #1A1305;
+    border: none;
+    border-radius: 9px;
+    padding: 13px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .btn-cancel {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-muted);
+    border-radius: 9px;
+    padding: 13px 18px;
+    font-size: 15px;
+  }
+  .sheet-last {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: -4px 0 16px;
+  }
+  .sheet-loc {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--bg-input);
+    border: 1px solid var(--line-soft);
+    border-radius: 9px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .btn-pin {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 7px;
+    padding: 7px 11px;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .btn-pin.set { border-color: var(--clear); color: var(--clear); }
+
+  .road-row { animation: fadeIn 0.25s ease both; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .radar-compass {
+    font-family: var(--sans);
+    font-size: 9px;
+    fill: var(--text-muted);
+    opacity: 0.6;
+  }
+  .radar-marker.flooded circle.pulse {
+    fill: none;
+    stroke: var(--flood);
+    stroke-width: 1.5;
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow-row">
+      <h1><span class="tide">🌊</span> Roadwatch</h1>
+      <div class="status-count" id="statusCount"></div>
+    </div>
+    <p class="tagline">Shared, live reports on which roads are flooded right now. Check before you go, update after you drive it.</p>
+    <p class="setup-note" id="setupNote" hidden></p>
+
+    <details class="connect" id="connectPanel" hidden>
+      <summary>Connect this sheet so reports can save — one-time, ~2 min</summary>
+      <div class="connect-body">
+        <ol class="connect-steps">
+          <li>Open <a href="https://docs.google.com/spreadsheets/d/1y174jaLfE83ksc5i0I2nfm164IHEFB8uZPcoHj_4aJE/edit" target="_blank" rel="noopener">the sheet</a> → <b>Extensions → Apps Script</b>.</li>
+          <li>Replace the sample code with the code below, then <b>Deploy → New deployment → Web app</b> — <i>Execute as: Me</i>, <i>Who has access: Anyone</i>. Authorize when asked.</li>
+          <li>Copy the <b>Web app URL</b> (it ends in <code>/exec</code>) and paste it here:</li>
+        </ol>
+
+        <div class="connect-row">
+          <input type="text" id="execUrlInput" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false">
+          <button class="btn-add" id="connectBtn">Connect</button>
+        </div>
+        <p class="connect-hint" id="connectHint"></p>
+
+        <div class="code-head">
+          <span>Apps Script code</span>
+          <button class="btn-copy" id="copyBackendBtn" type="button">Copy</button>
+        </div>
+        <pre class="code-box" id="backendCode"></pre>
+      </div>
+    </details>
+  </header>
+
+  <div class="search-row">
+    <input type="text" id="searchInput" placeholder="Search a road…" autocomplete="off">
+    <button class="btn-add" id="addBtn">Add road</button>
+  </div>
+
+  <div class="locate-row">
+    <button class="btn-locate" id="locateBtn"><span class="locate-pulse"></span><span id="locateLabel">Use my location</span></button>
+  </div>
+
+  <div class="radar-wrap" id="radarWrap">
+    <div class="radar-head">
+      <span class="radar-title">Nearby, live</span>
+      <span class="radar-scale" id="radarScale"></span>
+    </div>
+    <svg class="radar-svg" id="radarSvg" viewBox="0 0 300 300"></svg>
+    <div class="radar-empty" id="radarEmpty" style="display:none;">No located roads yet — pins land here once someone adds a road while location is on.</div>
+  </div>
+
+  <section class="list" id="listRoot">
+    <div class="empty">
+      <strong>Loading roads…</strong>
+      Give it a moment.
+    </div>
+  </section>
+</div>
+
+<div class="sheet-backdrop" id="sheetBackdrop">
+  <div class="sheet">
+    <p class="sheet-title" id="sheetTitle">Road name</p>
+    <p class="sheet-sub" id="sheetSub">Set the current status</p>
+    <p class="sheet-last" id="sheetLast"></p>
+    <div class="sheet-loc">
+      <span id="sheetLocLabel">No location pinned</span>
+      <button class="btn-pin" id="pinBtn">Pin my location</button>
+    </div>
+    <div class="choice-row">
+      <button class="choice flooded" data-status="flooded">Flooded</button>
+      <button class="choice clear" data-status="clear">Clear</button>
+      <button class="choice unknown" data-status="unknown">Unknown</button>
+    </div>
+    <textarea id="noteInput" placeholder="Optional note — how deep, which stretch, when you saw it…"></textarea>
+    <div class="sheet-actions">
+      <button class="btn-cancel" id="cancelBtn">Cancel</button>
+      <button class="btn-save" id="saveBtn">Save status</button>
+    </div>
+  </div>
+</div>
+
+<script type="text/plain" id="backendSrc">
+/**
+ * Roadwatch — Google Apps Script backend for the sheet
+ * https://docs.google.com/spreadsheets/d/1y174jaLfE83ksc5i0I2nfm164IHEFB8uZPcoHj_4aJE/edit
+ *
+ * Paste this into Extensions -> Apps Script, then:
+ *   Deploy -> New deployment -> Web app
+ *     Execute as: Me
+ *     Who has access: Anyone
+ * Copy the /exec URL into the Connect panel on the Roadwatch page.
+ */
+
+const SHEET_NAME = 'Roads';
+const HEADERS = ['id', 'name', 'status', 'note', 'updatedAt', 'lat', 'lng'];
+
+function getSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet) sheet = ss.insertSheet(SHEET_NAME);
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(HEADERS);
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function json_(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function numOrNull_(v) {
+  if (v === '' || v === null || v === undefined) return null;
+  const n = Number(v);
+  return isNaN(n) ? null : n;
+}
+
+function toRoad_(obj) {
+  return {
+    id: String(obj.id || ''),
+    name: String(obj.name || ''),
+    status: String(obj.status || 'unknown').toLowerCase(),
+    note: obj.note == null ? '' : String(obj.note),
+    updatedAt: numOrNull_(obj.updatedAt),
+    lat: numOrNull_(obj.lat),
+    lng: numOrNull_(obj.lng)
+  };
+}
+
+function doGet(e) {
+  try {
+    const action = (e && e.parameter && e.parameter.action) || 'list';
+    if (action !== 'list') return json_({ ok: false, error: 'Unknown action: ' + action });
+
+    const values = getSheet_().getDataRange().getValues();
+    const headers = values.shift().map(function (h) { return String(h).trim(); });
+    const roads = values
+      .filter(function (r) { return String(r[0]).trim() !== ''; })
+      .map(function (r) {
+        const o = {};
+        headers.forEach(function (h, i) { o[h] = r[i]; });
+        return toRoad_(o);
+      });
+
+    return json_({ ok: true, roads: roads });
+  } catch (err) {
+    return json_({ ok: false, error: String(err) });
+  }
+}
+
+function doPost(e) {
+  try {
+    const body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+    if (body.action !== 'upsert' || !body.road) {
+      return json_({ ok: false, error: 'Bad request' });
+    }
+    const road = toRoad_(body.road);
+
+    const lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+    try {
+      const sheet = getSheet_();
+      const values = sheet.getDataRange().getValues();
+      const headers = values[0].map(function (h) { return String(h).trim(); });
+
+      let rowIndex = -1;
+      for (let i = 1; i < values.length; i++) {
+        if (String(values[i][0]) === road.id) { rowIndex = i + 1; break; }
+      }
+
+      const row = headers.map(function (h) { return road[h] === undefined ? '' : road[h]; });
+      if (rowIndex > 0) {
+        sheet.getRange(rowIndex, 1, 1, headers.length).setValues([row]);
+      } else {
+        sheet.appendRow(row);
+      }
+    } finally {
+      lock.releaseLock();
+    }
+
+    return json_({ ok: true });
+  } catch (err) {
+    return json_({ ok: false, error: String(err) });
+  }
+}
+</script>
+
+<script>
+  // --- Google Sheet config ---------------------------------------------------
+  // The sheet this app reads and writes:
+  // https://docs.google.com/spreadsheets/d/1y174jaLfE83ksc5i0I2nfm164IHEFB8uZPcoHj_4aJE/edit
+  const SHEET_ID = '1y174jaLfE83ksc5i0I2nfm164IHEFB8uZPcoHj_4aJE';
+  const SHEET_URL = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/edit';
+  // Saving needs a small Apps Script web app bound to that sheet. Everything you
+  // need is inside this page: open the "Connect" panel at the top, copy the code,
+  // deploy it, then paste the /exec URL back into the panel. The URL is kept in
+  // localStorage, so no file editing is required.
+  const SCRIPT_URL_KEY = 'roadwatch.scriptUrl';
+  function storedScriptUrl() {
+    try { return (localStorage.getItem(SCRIPT_URL_KEY) || '').trim(); } catch (e) { return ''; }
+  }
+  let scriptUrl = storedScriptUrl();
+  let readOnly = !scriptUrl;
+  const POLL_MS = 10000;
+
+  let roads = []; // {id, name, status, note, updatedAt, lat, lng}
+  let pendingWrites = 0;
+  let currentRoad = null;
+  let pendingStatus = null;
+  let userLoc = null; // {lat, lng}
+  let watchId = null;
+
+  const listRoot = document.getElementById('listRoot');
+  const statusCount = document.getElementById('statusCount');
+  const searchInput = document.getElementById('searchInput');
+  const sheetBackdrop = document.getElementById('sheetBackdrop');
+  const sheetTitle = document.getElementById('sheetTitle');
+  const sheetSub = document.getElementById('sheetSub');
+  const sheetLast = document.getElementById('sheetLast');
+  const noteInput = document.getElementById('noteInput');
+  const sheetLocLabel = document.getElementById('sheetLocLabel');
+  const pinBtn = document.getElementById('pinBtn');
+  let pendingLoc = null; // {lat,lng} staged for save, or 'clear' sentinel, or undefined = unchanged
+  const locateBtn = document.getElementById('locateBtn');
+  const locateLabel = document.getElementById('locateLabel');
+  const radarWrap = document.getElementById('radarWrap');
+  const radarSvg = document.getElementById('radarSvg');
+  const radarScale = document.getElementById('radarScale');
+  const radarEmpty = document.getElementById('radarEmpty');
+
+  // --- geo math ---
+  function toRad(d) { return d * Math.PI / 180; }
+  function distanceMeters(a, b) {
+    const R = 6371000;
+    const dLat = toRad(b.lat - a.lat);
+    const dLng = toRad(b.lng - a.lng);
+    const s = Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(s));
+  }
+  function bearingDeg(a, b) {
+    const y = Math.sin(toRad(b.lng - a.lng)) * Math.cos(toRad(b.lat));
+    const x = Math.cos(toRad(a.lat)) * Math.sin(toRad(b.lat)) -
+      Math.sin(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.cos(toRad(b.lng - a.lng));
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  }
+  function formatDistance(m) {
+    if (m < 950) return Math.round(m / 10) * 10 + ' m';
+    return (m / 1000).toFixed(1) + ' km';
+  }
+
+  function slugify(name) {
+    return name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || ('road-' + Date.now());
+  }
+
+  function timeAgo(ts) {
+    if (!ts) return 'no reports yet';
+    const s = Math.floor((Date.now() - ts) / 1000);
+    if (s < 60) return 'just now';
+    const m = Math.floor(s / 60);
+    if (m < 60) return m + 'm ago';
+    const h = Math.floor(m / 60);
+    if (h < 24) return h + 'h ago';
+    const d = Math.floor(h / 24);
+    return d + 'd ago';
+  }
+
+  function statusLabel(s) {
+    return s === 'flooded' ? 'Flooded' : s === 'clear' ? 'Clear' : 'Unknown';
+  }
+
+  function render() {
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = roads.filter(r => r.name.toLowerCase().includes(q));
+
+    const floodedCount = roads.filter(r => r.status === 'flooded').length;
+    statusCount.innerHTML = floodedCount > 0
+      ? `<strong>${floodedCount} flooded</strong> · ${roads.length} tracked`
+      : `${roads.length} tracked`;
+
+    if (filtered.length === 0) {
+      listRoot.innerHTML = roads.length === 0
+        ? `<div class="empty"><strong>No roads tracked yet</strong>Add the ones you cross often, so anyone checking can see them at a glance.</div>`
+        : `<div class="empty"><strong>No matches</strong>Try a different search, or add this road.</div>`;
+      return;
+    }
+
+    const order = { flooded: 0, unknown: 1, clear: 2 };
+    const sorted = [...filtered].sort((a, b) => {
+      const oa = order[a.status] ?? 1, ob = order[b.status] ?? 1;
+      if (oa !== ob) return oa - ob;
+      if (userLoc && a.lat != null && b.lat != null) {
+        return distanceMeters(userLoc, a) - distanceMeters(userLoc, b);
+      }
+      if (userLoc && a.lat != null) return -1;
+      if (userLoc && b.lat != null) return 1;
+      return a.name.localeCompare(b.name);
+    });
+
+    const groups = [
+      { key: 'flooded', label: 'Flooded now' },
+      { key: 'unknown', label: 'Unreported / unclear' },
+      { key: 'clear', label: 'Clear' },
+    ];
+
+    let html = '';
+    for (const g of groups) {
+      const items = sorted.filter(r => r.status === g.key);
+      if (items.length === 0) continue;
+      html += `<div class="group-label"><span class="dot ${g.key}"></span>${g.label}</div>`;
+      for (const r of items) {
+        html += `
+          <div class="road-row" data-id="${r.id}">
+            <div class="bar ${r.status}"></div>
+            <div class="road-main">
+              <p class="road-name">${escapeHtml(r.name)}</p>
+              <div class="road-meta">
+                ${userLoc && r.lat != null ? `<span>${formatDistance(distanceMeters(userLoc, r))} away</span> ·` : ''}
+                <span>${timeAgo(r.updatedAt)}</span>
+                ${r.note ? `<span>· ${escapeHtml(r.note)}</span>` : ''}
+              </div>
+            </div>
+            <span class="pill ${r.status}">${statusLabel(r.status)}</span>
+          </div>`;
+      }
+    }
+    listRoot.innerHTML = html;
+
+    listRoot.querySelectorAll('.road-row').forEach(el => {
+      el.addEventListener('click', () => openSheet(el.dataset.id));
+    });
+
+    renderRadar();
+  }
+
+  function renderRadar() {
+    if (!userLoc) {
+      radarWrap.classList.remove('visible');
+      return;
+    }
+    radarWrap.classList.add('visible');
+
+    const located = roads
+      .map(r => (r.lat != null ? { ...r, dist: distanceMeters(userLoc, r), brg: bearingDeg(userLoc, r) } : null))
+      .filter(Boolean);
+
+    if (located.length === 0) {
+      radarSvg.innerHTML = '';
+      radarEmpty.style.display = 'block';
+      radarScale.textContent = '';
+      return;
+    }
+    radarEmpty.style.display = 'none';
+
+    const cx = 150, cy = 150, R = 128;
+    const maxDist = Math.max(...located.map(r => r.dist), 300);
+    const scaleMax = Math.ceil(maxDist / 100) * 100;
+    radarScale.textContent = 'out to ' + formatDistance(scaleMax);
+
+    let svg = '';
+    for (const frac of [0.33, 0.66, 1]) {
+      svg += `<circle class="radar-ring" cx="${cx}" cy="${cy}" r="${R * frac}"></circle>`;
+    }
+    const compass = [['N', 0], ['E', 90], ['S', 180], ['W', 270]];
+    for (const [label, deg] of compass) {
+      const rad = toRad(deg);
+      const x = cx + (R + 10) * Math.sin(rad);
+      const y = cy - (R + 10) * Math.cos(rad) + 3;
+      svg += `<text class="radar-compass" x="${x}" y="${y}" text-anchor="middle">${label}</text>`;
+    }
+    svg += `<circle class="radar-you-ring" cx="${cx}" cy="${cy}" r="10"><animate attributeName="r" values="10;16;10" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.35;0;0.35" dur="2.4s" repeatCount="indefinite"/></circle>`;
+    svg += `<circle class="radar-you" cx="${cx}" cy="${cy}" r="5"></circle>`;
+
+    for (const r of located) {
+      const scaledR = Math.min(r.dist / scaleMax, 1) * (R - 14);
+      const rad = toRad(r.brg);
+      const x = cx + scaledR * Math.sin(rad);
+      const y = cy - scaledR * Math.cos(rad);
+      const label = r.name.length > 16 ? r.name.slice(0, 15) + '…' : r.name;
+      const pulse = r.status === 'flooded'
+        ? `<circle class="pulse" cx="${x}" cy="${y}" r="7"><animate attributeName="r" values="7;14;7" dur="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;0;0.6" dur="1.8s" repeatCount="indefinite"/></circle>`
+        : '';
+      svg += `
+        <g class="radar-marker ${r.status}" data-id="${r.id}">
+          ${pulse}
+          <circle cx="${x}" cy="${y}" r="7"></circle>
+          <text x="${x}" y="${y + 18}" text-anchor="middle">${escapeHtml(label)}</text>
+        </g>`;
+    }
+    radarSvg.innerHTML = svg;
+    radarSvg.querySelectorAll('.radar-marker').forEach(el => {
+      el.addEventListener('click', () => openSheet(el.dataset.id));
+    });
+  }
+
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function openSheet(id) {
+    currentRoad = roads.find(r => r.id === id);
+    if (!currentRoad) return;
+    pendingStatus = currentRoad.status || 'unknown';
+    sheetTitle.textContent = currentRoad.name;
+    sheetSub.textContent = 'Update the current status';
+    sheetLast.textContent = currentRoad.updatedAt ? `Last reported ${timeAgo(currentRoad.updatedAt)}` : 'No reports yet';
+    noteInput.value = currentRoad.note || '';
+    pendingLoc = undefined;
+    updateLocUI();
+    updateChoiceUI();
+    sheetBackdrop.classList.add('open');
+  }
+
+  function updateLocUI() {
+    const hasLoc = pendingLoc !== undefined ? pendingLoc !== null : (currentRoad.lat != null);
+    sheetLocLabel.textContent = hasLoc ? 'Location pinned — shows on the radar' : 'No location pinned — won\u2019t show on the radar';
+    pinBtn.classList.toggle('set', hasLoc);
+    pinBtn.textContent = hasLoc ? 'Re-pin here' : 'Pin my location';
+  }
+
+  pinBtn.addEventListener('click', () => {
+    if (!navigator.geolocation) return;
+    pinBtn.textContent = 'Locating…';
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        pendingLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        updateLocUI();
+      },
+      () => {
+        pinBtn.textContent = 'Couldn\u2019t get location';
+        setTimeout(updateLocUI, 1500);
+      },
+      { enableHighAccuracy: true, timeout: 15000 }
+    );
+  });
+
+  function closeSheet() {
+    sheetBackdrop.classList.remove('open');
+    currentRoad = null;
+  }
+
+  function updateChoiceUI() {
+    document.querySelectorAll('.choice').forEach(btn => {
+      btn.classList.toggle('selected', btn.dataset.status === pendingStatus);
+    });
+  }
+
+  document.querySelectorAll('.choice').forEach(btn => {
+    btn.addEventListener('click', () => {
+      pendingStatus = btn.dataset.status;
+      updateChoiceUI();
+    });
+  });
+
+  document.getElementById('cancelBtn').addEventListener('click', closeSheet);
+  sheetBackdrop.addEventListener('click', (e) => {
+    if (e.target === sheetBackdrop) closeSheet();
+  });
+
+  // --- Google Sheets backend (via Apps Script web app) ---
+  // Public no-auth read straight from the sheet. Used in read-only mode, and it
+  // needs only "Anyone with the link → Viewer" sharing. Loaded as JSONP so it
+  // also works when the page is opened straight from disk (file:// has no CORS).
+  let sheetReadSeq = 0;
+  function readSheetJson() {
+    return new Promise((resolve, reject) => {
+      const cb = '__roadwatchSheet' + (++sheetReadSeq) + '_' + Date.now().toString(36);
+      const tag = document.createElement('script');
+      let done = false;
+      const finish = (fn, val) => {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        try { delete window[cb]; } catch (e) { window[cb] = undefined; }
+        if (tag.parentNode) tag.parentNode.removeChild(tag);
+        fn(val);
+      };
+      const timer = setTimeout(() => finish(reject, new Error('Sheet read timed out')), 15000);
+      window[cb] = (data) => finish(resolve, data);
+      tag.onerror = () => finish(reject, new Error('Sheet read failed'));
+      tag.src = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
+        '/gviz/tq?tqx=responseHandler:' + cb + ';out:json&t=' + Date.now();
+      document.head.appendChild(tag);
+    });
+  }
+
+  async function apiListFromSheet() {
+    const json = await readSheetJson();
+    if (!json || json.status === 'error') throw new Error('Sheet read failed');
+    const cols = json.table.cols.map(c => String(c.label || '').trim().toLowerCase());
+    const col = (...names) => {
+      for (const n of names) {
+        const i = cols.indexOf(n);
+        if (i !== -1) return i;
+      }
+      return -1;
+    };
+    const iId = col('id'), iName = col('name', 'road', 'road name');
+    if (iId === -1 || iName === -1) return []; // no header row in the sheet yet
+    const iStatus = col('status'), iNote = col('note', 'notes'),
+      iUpd = col('updatedat', 'updated at', 'updated'), iLat = col('lat', 'latitude'),
+      iLng = col('lng', 'lon', 'longitude');
+    const at = (row, i) => (i === -1 || !row.c || !row.c[i]) ? null : row.c[i].v;
+    return json.table.rows.map(row => ({
+      id: String(at(row, iId) ?? ''),
+      name: String(at(row, iName) ?? ''),
+      status: String(at(row, iStatus) || 'unknown').toLowerCase(),
+      note: at(row, iNote) == null ? '' : String(at(row, iNote)),
+      updatedAt: at(row, iUpd) == null ? null : (Number(at(row, iUpd)) || null),
+      lat: at(row, iLat) == null ? null : Number(at(row, iLat)),
+      lng: at(row, iLng) == null ? null : Number(at(row, iLng)),
+    })).filter(r => r.id && r.name);
+  }
+
+  async function apiList() {
+    if (readOnly) return apiListFromSheet();
+    const res = await fetch(scriptUrl + '?action=list&t=' + Date.now());
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || 'Load failed');
+    return json.roads;
+  }
+  async function apiUpsert(road) {
+    if (readOnly) throw new Error('Read-only mode — saving is off');
+    // text/plain avoids a CORS preflight, which Apps Script can't answer
+    const res = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'upsert', road })
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || 'Save failed');
+    return json;
+  }
+  async function refresh() {
+    if (pendingWrites > 0) return; // don't overwrite optimistic local changes
+    try {
+      roads = await apiList();
+      render();
+    } catch (e) {
+      console.error('Load failed', e);
+      if (roads.length === 0) {
+        listRoot.innerHTML = readOnly
+          ? `<div class="empty"><strong>Can't read the sheet</strong>Open <a href="${SHEET_URL}" target="_blank" rel="noopener">the sheet</a> and share it as “Anyone with the link → Viewer”, then reload. Or use the Connect panel at the top of the page to hook up saving.</div>`
+          : `<div class="empty"><strong>Can't reach the sheet</strong>Check the connection and reload. Reports can't save or sync until it's back.</div>`;
+      }
+    }
+  }
+  async function writeRoad(road) {
+    pendingWrites++;
+    try {
+      await apiUpsert(road);
+    } catch (e) {
+      console.error('Write failed', e);
+      alert('Couldn\u2019t save to the sheet. Please try again.');
+    } finally {
+      pendingWrites--;
+      refresh();
+    }
+  }
+
+  function requireWrite() {
+    if (!readOnly) return true;
+    const panel = document.getElementById('connectPanel');
+    if (panel) {
+      panel.hidden = false;
+      panel.open = true;
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    return false;
+  }
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    if (!requireWrite()) return;
+    if (!currentRoad) return;
+    const road = { ...currentRoad,
+      status: pendingStatus,
+      note: noteInput.value.trim(),
+      updatedAt: Date.now(),
+    };
+    if (pendingLoc !== undefined) {
+      road.lat = pendingLoc ? pendingLoc.lat : null;
+      road.lng = pendingLoc ? pendingLoc.lng : null;
+    }
+    roads = roads.map(r => r.id === road.id ? road : r); // optimistic
+    render();
+    closeSheet();
+    writeRoad(road);
+  });
+
+  document.getElementById('addBtn').addEventListener('click', () => {
+    if (!requireWrite()) return;
+    const name = (searchInput.value.trim()) || prompt('Name this road (e.g. "Mill Street underpass")');
+    if (!name) return;
+    const id = slugify(name);
+    if (roads.find(r => r.id === id)) {
+      openSheet(id);
+      return;
+    }
+    const road = {
+      id, name,
+      status: 'unknown',
+      note: '',
+      updatedAt: null,
+      lat: userLoc ? userLoc.lat : null,
+      lng: userLoc ? userLoc.lng : null,
+    };
+    roads = [...roads, road]; // optimistic
+    searchInput.value = '';
+    render();
+    writeRoad(road);
+  });
+
+  searchInput.addEventListener('input', render);
+
+  function stopLocate() {
+    if (watchId != null && navigator.geolocation) {
+      navigator.geolocation.clearWatch(watchId);
+    }
+    watchId = null;
+    userLoc = null;
+    locateBtn.classList.remove('active');
+    locateLabel.textContent = 'Use my location';
+    render();
+  }
+
+  function startLocate() {
+    if (!navigator.geolocation) {
+      locateLabel.textContent = 'Location not supported';
+      return;
+    }
+    locateLabel.textContent = 'Locating…';
+    watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        userLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        locateBtn.classList.add('active');
+        locateLabel.textContent = 'Live location on';
+        render();
+      },
+      (err) => {
+        locateBtn.classList.remove('active');
+        locateLabel.textContent = err.code === 1 ? 'Location blocked' : 'Location unavailable';
+        userLoc = null;
+        render();
+      },
+      { enableHighAccuracy: true, maximumAge: 15000, timeout: 20000 }
+    );
+  }
+
+  locateBtn.addEventListener('click', () => {
+    if (watchId != null) {
+      stopLocate();
+    } else {
+      startLocate();
+    }
+  });
+
+  // --- saving-endpoint setup --------------------------------------------------
+  function copyText(text, done) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done, () => legacyCopy(text, done));
+    } else {
+      legacyCopy(text, done);
+    }
+  }
+  function legacyCopy(text, done) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '-1000px';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove();
+    if (ok) done();
+    else document.getElementById('connectHint').textContent = 'Copy failed — select the code and copy it by hand.';
+  }
+
+  function connectSaving() {
+    const input = document.getElementById('execUrlInput');
+    const hint = document.getElementById('connectHint');
+    const url = input.value.trim();
+    if (!/^https:\/\/script\.google\.com\/macros\/s\//.test(url) || url.indexOf('/exec') === -1) {
+      hint.textContent = 'That doesn\u2019t look like a Web app URL — it should start with https://script.google.com/macros/s/ and end with /exec.';
+      return;
+    }
+    try {
+      localStorage.setItem(SCRIPT_URL_KEY, url);
+      hint.textContent = 'Saved — reloading…';
+      location.reload();
+    } catch (e) {
+      hint.textContent = 'Couldn\u2019t save the URL in this browser. Try a normal (non-incognito) window.';
+    }
+  }
+
+  document.getElementById('connectBtn').addEventListener('click', connectSaving);
+  document.getElementById('execUrlInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') connectSaving();
+  });
+  document.getElementById('copyBackendBtn').addEventListener('click', () => {
+    const btn = document.getElementById('copyBackendBtn');
+    copyText(document.getElementById('backendSrc').textContent.trim(), () => {
+      btn.textContent = 'Copied';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1600);
+    });
+  });
+
+  function init() {
+    const note = document.getElementById('setupNote');
+    const panel = document.getElementById('connectPanel');
+    document.getElementById('backendCode').textContent =
+      document.getElementById('backendSrc').textContent.trim();
+
+    if (readOnly) {
+      note.hidden = false;
+      note.innerHTML = 'Reading <a href="' + SHEET_URL + '" target="_blank" rel="noopener">the sheet</a> live — read-only until saving is connected.' +
+        ' <a href="#" id="setupJump" class="setup-jump">Set it up ›</a>';
+      note.querySelector('#setupJump').addEventListener('click', (e) => {
+        e.preventDefault();
+        requireWrite();
+      });
+      panel.hidden = false;
+    } else {
+      note.hidden = true;
+      panel.hidden = true;
+    }
+
+    refresh();
+    setInterval(refresh, POLL_MS);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+  }
+
+  init();
+</script>
+</body>
+</html>
